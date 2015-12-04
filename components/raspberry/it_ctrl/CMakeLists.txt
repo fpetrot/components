@@ -1,0 +1,2 @@
+rabbits_add_sources(raspberry_it_controller.cc)
+rabbits_add_components(raspberry_it_controller.yml)

@@ -1,0 +1,7 @@
+component:
+  name: rpi-arm-timer
+  type: bcm2835-sp804
+  class: raspberry_arm_timer
+  include: components/raspberry/timer/raspberry_arm_timer.h
+  description: Raspberry PI sp804-like timer
+  

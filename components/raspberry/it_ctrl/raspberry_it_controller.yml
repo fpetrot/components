@@ -1,0 +1,6 @@
+component:
+  name: rpi-irq-ctrl
+  type: bcm2835-irq-ctrl
+  class: raspberry_it_controller
+  include: components/raspberry/it_ctrl/raspberry_it_controller.h
+  description: BCM2835 interrupt controller

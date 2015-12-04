@@ -1,0 +1,19 @@
+component:
+  name: generic-memory
+  type: memory
+  class: Memory
+  include: components/memory/memory.h
+  description: Generic memory components with optional read and write latency.
+  parameters:
+    size:
+      type: uint64
+      default: 128M
+      description: Memory size in byte.
+    #read-latency:
+      #type: time
+      #default: 0
+      #description: Memory read latency.
+    #write-latency:
+      #type: time
+      #default: 0
+      #description: Memory write latency.

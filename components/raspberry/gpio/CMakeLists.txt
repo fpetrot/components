@@ -1,0 +1,2 @@
+rabbits_add_sources(raspberry_gpio.cc)
+rabbits_add_components(raspberry_gpio.yml)
