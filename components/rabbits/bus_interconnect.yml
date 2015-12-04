@@ -1,6 +1,0 @@
-component:
-  name: generic-bus
-  type: simple-bus
-  class: BusInterconnect<32>
-  include: components/rabbits/bus_interconnect.h
-  description: Generic TLM2.0 compatible bus component
