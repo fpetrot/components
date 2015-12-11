@@ -11,5 +11,3 @@ add_subdirectory(components)
 add_subdirectory(plugins)
 
 rabbits_add_dynlib(components)
-
-install(TARGETS components DESTINATION lib/rabbits)
