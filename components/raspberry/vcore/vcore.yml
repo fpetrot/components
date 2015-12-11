@@ -1,6 +1,0 @@
-component:
-  name: rpi-vcore
-  type: bcm2835-vcore
-  class: rpi_vcore
-  include: components/raspberry/vcore/vcore.h
-  description: BCM2835 VideoCore

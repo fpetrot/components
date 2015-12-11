@@ -1,2 +1,0 @@
-rabbits_add_sources(raspberry_uart.cc)
-rabbits_add_components(raspberry_uart.yml)

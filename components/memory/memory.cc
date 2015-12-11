@@ -22,7 +22,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "rabbits/logger.h"
+#include <rabbits/logger.h>
 
 using namespace sc_core;
 
@@ -33,9 +33,6 @@ Memory::Memory(const char *name, uint64_t size)
 {
     m_size = size;
     m_bytes = new unsigned char[m_size];
-#ifdef PARANOID_INIT
-    memset (m_bytes, 0, m_size);
-#endif
     DBG_PRINTF("memory: Memory area location: %p\n", m_bytes);
 }
 

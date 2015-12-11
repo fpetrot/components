@@ -8,6 +8,7 @@ include_directories(
 )
 
 add_subdirectory(components)
+add_subdirectory(plugins)
 
 rabbits_add_dynlib(components)
 

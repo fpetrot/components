@@ -20,7 +20,7 @@
 #ifndef _MEM_DEVICE_H_
 #define _MEM_DEVICE_H_
 
-#include "rabbits/component/slave.h"
+#include <rabbits/component/slave.h>
 
 class Memory: public Slave
 {

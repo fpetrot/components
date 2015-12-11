@@ -1,6 +1,0 @@
-component:
-  name: rpi-system-timer
-  type: bcm2835-system-timer
-  class: raspberry_system_timer
-  include: components/raspberry/system_timer/raspberry_system_timer.h
-  description: BCM2835 system timer

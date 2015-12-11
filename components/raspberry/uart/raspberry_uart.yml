@@ -1,6 +1,0 @@
-component:
-  name: rpi-uart
-  type: uart-pl011
-  class: raspberry_uart
-  include: components/raspberry/uart/raspberry_uart.h
-  description: PL011 UART
