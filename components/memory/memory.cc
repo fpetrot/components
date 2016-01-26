@@ -26,26 +26,13 @@
 
 using namespace sc_core;
 
-Memory::Memory(const char *name, uint64_t size)
-    : Slave(name)
-    , MEM_WRITE_LATENCY(3, SC_NS)
-    , MEM_READ_LATENCY(3, SC_NS)
-{
-    m_size = size;
-    m_bytes = new unsigned char[m_size];
-    DBG_PRINTF("memory: Memory area location: %p\n", m_bytes);
-}
-
-Memory::Memory(const std::string &name, ComponentParameters &params)
+Memory::Memory(sc_core::sc_module_name name, ComponentParameters &params)
     : Slave(name, params)
     , MEM_WRITE_LATENCY(3, SC_NS)
     , MEM_READ_LATENCY(3, SC_NS)
 {
     m_size = params["size"].as<uint64_t>();
     m_bytes = new unsigned char[m_size];
-#ifdef PARANOID_INIT
-    memset (m_bytes, 0, m_size);
-#endif
     DBG_PRINTF("memory: Memory area location: %p\n", m_bytes);
 }
 
