@@ -9,6 +9,11 @@ component:
       type: uint64
       default: 128M
       description: Memory size in byte.
+    readonly:
+      type: boolean
+      default: false
+      description: Read-only memory
+
     #read-latency:
       #type: time
       #default: 0

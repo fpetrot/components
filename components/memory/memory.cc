@@ -32,8 +32,8 @@ Memory::Memory(sc_core::sc_module_name name, ComponentParameters &params)
     , MEM_READ_LATENCY(3, SC_NS)
 {
     m_size = params["size"].as<uint64_t>();
+    m_readonly = params["readonly"].as<bool>();
     m_bytes = new unsigned char[m_size];
-    DBG_PRINTF("memory: Memory area location: %p\n", m_bytes);
 }
 
 
@@ -45,24 +45,32 @@ Memory::~Memory()
 
 void Memory::bus_cb_read(uint64_t addr, uint8_t *data, unsigned int len, bool &bErr)
 {
-    if(addr + len >= m_size) {
-        printf("memory: error : reading outside bounds\n");
-        exit(1);
+    wait(MEM_READ_LATENCY);
+
+    if (addr + len >= m_size) {
+        ERR_PRINTF("reading outside bounds\n");
+        bErr = true;
+        return;
     }
 
     memcpy(data, m_bytes + addr, len);
-
-    wait(MEM_READ_LATENCY);
 }
 
 void Memory::bus_cb_write(uint64_t addr, uint8_t *data, unsigned int len, bool &bErr)
 {
-    if(addr + len >= m_size) {
-        printf("memory: error : writing outside bounds\n");
-        exit(1);
+    wait(MEM_WRITE_LATENCY);
+
+    if (m_readonly) {
+        ERR_PRINTF("trying to write to read-only memory\n");
+        bErr = true;
+        return;
     }
 
-    wait(MEM_WRITE_LATENCY);
+    if (addr + len >= m_size) {
+        ERR_PRINTF("writing outside bounds\n");
+        bErr = true;
+        return;
+    }
 
     memcpy(m_bytes + addr, data, len);
 }
@@ -95,7 +103,13 @@ bool Memory::get_direct_mem_ptr(tlm::tlm_generic_payload& trans,
     dmi_data.set_start_address(0);
     dmi_data.set_end_address(m_size-1);
     dmi_data.set_dmi_ptr(m_bytes);
-    dmi_data.set_granted_access(tlm::tlm_dmi::DMI_ACCESS_READ_WRITE);
+
+    if (m_readonly) {
+        dmi_data.set_granted_access(tlm::tlm_dmi::DMI_ACCESS_READ);
+    } else {
+        dmi_data.set_granted_access(tlm::tlm_dmi::DMI_ACCESS_READ_WRITE);
+    }
+    
     dmi_data.set_write_latency(MEM_WRITE_LATENCY);
     dmi_data.set_read_latency(MEM_READ_LATENCY);
 
