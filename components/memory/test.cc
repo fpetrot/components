@@ -20,15 +20,24 @@
 #include <rabbits/test/test.h>
 #include <rabbits/test/slave_tester.h>
 
-using namespace sc_core;
+#include <cstring>
+#include <fstream>
 
-const uint64_t MEM_SIZE = 0x1000;
+#include <boost/filesystem.hpp>
+
+using namespace sc_core;
+using boost::filesystem::path;
+
 const sc_time MEM_READ_LATENCY(3, SC_NS);
 const sc_time MEM_WRITE_LATENCY(3, SC_NS);
 
-template <bool READONLY = false>
+const std::string FILE_BLOB = "test/blob";
+
+template <bool READONLY = false, bool LOAD_BLOB = false, uint64_t _MEM_SIZE=0x1000>
 class MemoryTester : public Test {
 protected:
+    static const uint64_t MEM_SIZE = _MEM_SIZE;
+
     ComponentBase *mem;
     SlaveTester<> tst;
 
@@ -41,6 +50,10 @@ protected:
         yml << "size: " << MEM_SIZE << "\n";
         yml << "readonly: " << READONLY << "\n";
 
+        if (LOAD_BLOB) {
+            yml << "file-blob: " << path(RABBITS_GET_TEST_DIR()).append(FILE_BLOB).string() << "\n";
+        }
+
         mem = create_component_by_name("generic-memory", yml.str());
 
         s = dynamic_cast<Slave*>(mem);
@@ -50,6 +63,28 @@ protected:
         tst.connect(*s);
     }
 
+    uint64_t load_blob(std::vector<uint8_t> &blob) {
+        path blob_path(RABBITS_GET_TEST_DIR());
+        blob_path /= FILE_BLOB;
+
+        DBG_STREAM("Trying to load blob file " << blob_path.string() << "\n");
+
+        std::ifstream f(blob_path.string().c_str(), std::ifstream::binary);
+        RABBITS_TEST_ASSERT(f.good());
+
+        f.unsetf(std::ios::skipws);
+
+        f.seekg(0, std::ios::end);
+        std::streampos file_size = f.tellg();
+        f.seekg(0, std::ios::beg);
+
+        blob.resize(file_size);
+
+        std::copy(std::istream_iterator<uint8_t>(f), std::istream_iterator<uint8_t>(), blob.begin());
+
+        return file_size;
+    }
+
 public:
     ~MemoryTester() {
         delete mem;
@@ -57,10 +92,11 @@ public:
     }
 };
 
+
 RABBITS_UNIT_TEST(memory_write_io, MemoryTester<>)
 {
     tst.bus_write_u32(0x0, 0xdecacafe);
- 
+
     RABBITS_TEST_ASSERT(tst.last_access_succeeded());
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
 
@@ -72,10 +108,10 @@ RABBITS_UNIT_TEST(memory_write_io, MemoryTester<>)
 RABBITS_UNIT_TEST(memory_read_io, MemoryTester<>)
 {
     tst.debug_write_u32_nofail(0x0, 0xdecacafe);
- 
+
     RABBITS_TEST_ASSERT_TIME_DELTA(SC_ZERO_TIME); /* Debug access should not have 
                                                      side effects on simulation time */
-    
+
     RABBITS_TEST_ASSERT(tst.bus_read_u32(0x0) == 0xdecacafe);
     RABBITS_TEST_ASSERT(tst.last_access_succeeded());
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_READ_LATENCY);
@@ -138,4 +174,43 @@ RABBITS_UNIT_TEST(memory_readonly_dmi, MemoryTester<true>)
     RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
     RABBITS_TEST_ASSERT(dmi.is_read_allowed());
     RABBITS_TEST_ASSERT(!dmi.is_write_allowed());
+}
+
+
+#define COMMA ,
+RABBITS_UNIT_TEST(memory_load_blob_plenty, MemoryTester<false COMMA true>)
+{
+    tlm::tlm_dmi dmi;
+
+    RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
+
+    std::vector<uint8_t> blob;
+    uint64_t file_size = load_blob(blob);
+
+    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.get_dmi_ptr(), file_size), 0);
+}
+
+
+RABBITS_UNIT_TEST(memory_load_blob_fit, MemoryTester<false COMMA true COMMA 1024>)
+{
+    tlm::tlm_dmi dmi;
+
+    RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
+
+    std::vector<uint8_t> blob;
+    uint64_t file_size = load_blob(blob);
+
+    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.get_dmi_ptr(), file_size), 0);
+}
+
+RABBITS_UNIT_TEST(memory_load_blob_trunc, MemoryTester<false COMMA true COMMA 512>)
+{
+    tlm::tlm_dmi dmi;
+
+    RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
+
+    std::vector<uint8_t> blob;
+    load_blob(blob);
+
+    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.get_dmi_ptr(), MEM_SIZE), 0);
 }

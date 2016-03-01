@@ -22,6 +22,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include <fstream>
+
 #include <rabbits/logger.h>
 
 using namespace sc_core;
@@ -33,7 +35,13 @@ Memory::Memory(sc_core::sc_module_name name, ComponentParameters &params)
 {
     m_size = params["size"].as<uint64_t>();
     m_readonly = params["readonly"].as<bool>();
-    m_bytes = new unsigned char[m_size];
+    m_bytes = new uint8_t[m_size];
+
+    std::string blob_fn = params["file-blob"].as<std::string>();
+
+    if (blob_fn != "") {
+        load_blob(blob_fn);
+    }
 }
 
 
@@ -41,6 +49,33 @@ Memory::~Memory()
 {
     if (m_bytes)
         delete[] m_bytes;
+}
+
+void Memory::load_blob(const std::string &fn)
+{
+    FILE *f = std::fopen(fn.c_str(), "r");
+
+    DBG_STREAM("Loading blob " << fn << "\n");
+
+    if (f == NULL) {
+        ERR_STREAM("Cannot load blob file " << fn << ". Memory will remain uninitialized\n");
+        return;
+    }
+
+    std::fseek(f, 0, SEEK_END);
+    long file_size = std::ftell(f);
+    std::fseek(f, 0, SEEK_SET);
+
+    if (uint64_t(file_size) > m_size) {
+        WRN_STREAM("Blob file " << fn << " does not fit into memory, loading will be truncated\n");
+    }
+
+    size_t to_read = std::min(uint64_t(file_size), m_size);
+    if (std::fread(m_bytes, to_read, 1, f) != 1) {
+        WRN_STREAM("Error while reading blob file " << fn << "\n");
+    }
+
+    std::fclose(f);
 }
 
 void Memory::bus_cb_read(uint64_t addr, uint8_t *data, unsigned int len, bool &bErr)

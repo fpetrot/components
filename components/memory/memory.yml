@@ -13,6 +13,10 @@ component:
       type: boolean
       default: false
       description: Read-only memory
+    file-blob:
+      type: string
+      default:
+      description: File image to load into the memory during elaboration
 
     #read-latency:
       #type: time
