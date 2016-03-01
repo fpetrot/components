@@ -51,7 +51,9 @@ protected:
         yml << "readonly: " << READONLY << "\n";
 
         if (LOAD_BLOB) {
-            yml << "file-blob: " << path(RABBITS_GET_TEST_DIR()).append(FILE_BLOB).string() << "\n";
+            path blob_path(RABBITS_GET_TEST_DIR());
+            blob_path /= FILE_BLOB;
+            yml << "file-blob: " << blob_path.string() << "\n";
         }
 
         mem = create_component_by_name("generic-memory", yml.str());
