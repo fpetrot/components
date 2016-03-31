@@ -2,7 +2,7 @@ component:
   name: generic-memory
   type: memory
   class: Memory
-  include: components/memory/memory.h
+  include: memory.h
   description: Generic memory components with optional read and write latency.
   parameters:
     size:
