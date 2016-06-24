@@ -41,10 +41,8 @@ protected:
     ComponentBase *mem;
     SlaveTester<> tst;
 
-
     MemoryTester(sc_module_name n) : Test(n), tst("slave-tester")
     {
-        Slave *s = NULL;
         std::stringstream yml;
 
         yml << "size: " << MEM_SIZE << "\n";
@@ -58,11 +56,7 @@ protected:
 
         mem = create_component_by_name("generic-memory", yml.str());
 
-        s = dynamic_cast<Slave*>(mem);
-
-        RABBITS_TEST_ASSERT(s != NULL);
-
-        tst.connect(*s);
+	mem->get_port("bus").connect(tst.get_port("bus"));
     }
 
     uint64_t load_blob(std::vector<uint8_t> &blob) {
@@ -121,16 +115,15 @@ RABBITS_UNIT_TEST(memory_read_io, MemoryTester<>)
 
 RABBITS_UNIT_TEST(memory_dmi, MemoryTester<>)
 {
-    tlm::tlm_dmi dmi;
+    DmiInfo dmi;
 
     RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
     RABBITS_TEST_ASSERT(dmi.is_read_write_allowed());
-    RABBITS_TEST_ASSERT_EQ(dmi.get_start_address(), (uint64_t)0);
-    RABBITS_TEST_ASSERT_EQ(dmi.get_end_address(), MEM_SIZE - 1);
-    RABBITS_TEST_ASSERT_EQ(dmi.get_read_latency(), MEM_READ_LATENCY);
-    RABBITS_TEST_ASSERT_EQ(dmi.get_write_latency(), MEM_WRITE_LATENCY);
+    RABBITS_TEST_ASSERT_EQ(dmi.range, AddressRange(0, MEM_SIZE));
+    RABBITS_TEST_ASSERT_EQ(dmi.read_latency, MEM_READ_LATENCY);
+    RABBITS_TEST_ASSERT_EQ(dmi.write_latency, MEM_WRITE_LATENCY);
 
-    uint32_t * mem = reinterpret_cast<uint32_t*>(dmi.get_dmi_ptr());
+    uint32_t * mem = reinterpret_cast<uint32_t*>(dmi.ptr);
 
     mem[0x20] = 0xbeef5a7a;
     RABBITS_TEST_ASSERT_EQ(
@@ -171,48 +164,48 @@ RABBITS_UNIT_TEST(memory_readonly, MemoryTester<true>)
 
 RABBITS_UNIT_TEST(memory_readonly_dmi, MemoryTester<true>)
 {
-    tlm::tlm_dmi dmi;
+    DmiInfo dmi;
 
     RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
-    RABBITS_TEST_ASSERT(dmi.is_read_allowed());
-    RABBITS_TEST_ASSERT(!dmi.is_write_allowed());
+    RABBITS_TEST_ASSERT(dmi.read_allowed);
+    RABBITS_TEST_ASSERT(!dmi.write_allowed);
 }
 
 
 #define COMMA ,
 RABBITS_UNIT_TEST(memory_load_blob_plenty, MemoryTester<false COMMA true>)
 {
-    tlm::tlm_dmi dmi;
+    DmiInfo dmi;
 
     RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
 
     std::vector<uint8_t> blob;
     uint64_t file_size = load_blob(blob);
 
-    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.get_dmi_ptr(), file_size), 0);
+    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.ptr, file_size), 0);
 }
 
 
 RABBITS_UNIT_TEST(memory_load_blob_fit, MemoryTester<false COMMA true COMMA 1024>)
 {
-    tlm::tlm_dmi dmi;
+    DmiInfo dmi;
 
     RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
 
     std::vector<uint8_t> blob;
     uint64_t file_size = load_blob(blob);
 
-    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.get_dmi_ptr(), file_size), 0);
+    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.ptr, file_size), 0);
 }
 
 RABBITS_UNIT_TEST(memory_load_blob_trunc, MemoryTester<false COMMA true COMMA 512>)
 {
-    tlm::tlm_dmi dmi;
+    DmiInfo dmi;
 
     RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
 
     std::vector<uint8_t> blob;
     load_blob(blob);
 
-    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.get_dmi_ptr(), MEM_SIZE), 0);
+    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.ptr, MEM_SIZE), 0);
 }

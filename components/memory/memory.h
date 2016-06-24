@@ -22,7 +22,7 @@
 
 #include <rabbits/component/slave.h>
 
-class Memory: public Slave
+class Memory: public Slave<>
 {
 protected:
     uint64_t m_size;
