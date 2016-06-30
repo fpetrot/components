@@ -136,16 +136,16 @@ RABBITS_UNIT_TEST(memory_dmi, MemoryTester<>)
 
 RABBITS_UNIT_TEST(memory_access_outbound, MemoryTester<>)
 {
-    Logger::get().mute(); /* Outbound accesses generate errors */
+    get_app_logger().mute(); /* Outbound accesses generate errors */
     tst.bus_write_u32(MEM_SIZE, 0xdeadbaba);
-    Logger::get().unmute();
+    get_app_logger().unmute();
 
     RABBITS_TEST_ASSERT(tst.last_access_failed());
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
 
-    Logger::get().mute();
+    get_app_logger().mute();
     tst.bus_read_u32(MEM_SIZE);
-    Logger::get().unmute();
+    get_app_logger().unmute();
 
     RABBITS_TEST_ASSERT(tst.last_access_failed());
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
@@ -153,9 +153,9 @@ RABBITS_UNIT_TEST(memory_access_outbound, MemoryTester<>)
 
 RABBITS_UNIT_TEST(memory_readonly, MemoryTester<true>)
 {
-    Logger::get().mute();
+    get_app_logger().mute();
     tst.bus_write_u32(0x0, 0xdada7070);
-    Logger::get().unmute();
+    get_app_logger().unmute();
 
     RABBITS_TEST_ASSERT(tst.last_access_failed());
     RABBITS_TEST_ASSERT_NE(tst.debug_read_u32_nofail(0x0), 0xdada7070);

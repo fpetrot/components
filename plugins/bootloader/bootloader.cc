@@ -99,7 +99,7 @@ void BootloaderPlugin::arm_bootloader(PlatformDescription &descr, PlatformBuilde
     bool has_dtb = false;
     bool has_kernel = false;
 
-    Logger::get().save_flags();
+    get_app_logger().save_flags();
 
     if (descr["kernel-image"].is_scalar()) {
         std::string img = descr["kernel-image"].as<std::string>();
@@ -146,7 +146,7 @@ void BootloaderPlugin::arm_bootloader(PlatformDescription &descr, PlatformBuilde
         ERR_STREAM("Bootloader failed.\n");
     }
 
-    Logger::get().restore_flags();
+    get_app_logger().restore_flags();
 }
 
 void BootloaderPlugin::hook(const PluginHookAfterBuild& h)
