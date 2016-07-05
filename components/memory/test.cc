@@ -63,7 +63,7 @@ protected:
         path blob_path(RABBITS_GET_TEST_DIR());
         blob_path /= FILE_BLOB;
 
-        DBG_STREAM("Trying to load blob file " << blob_path.string() << "\n");
+        LOG(APP, DBG) << "Trying to load blob file " << blob_path.string() << "\n";
 
         std::ifstream f(blob_path.string().c_str(), std::ifstream::binary);
         RABBITS_TEST_ASSERT(f.good());

@@ -55,10 +55,10 @@ void Memory::load_blob(const std::string &fn)
 {
     FILE *f = std::fopen(fn.c_str(), "r");
 
-    DBG_STREAM("Loading blob " << fn << "\n");
+    LOG(APP, DBG) << "Loading blob " << fn << "\n";
 
     if (f == NULL) {
-        ERR_STREAM("Cannot load blob file " << fn << ". Memory will remain uninitialized\n");
+        LOG(APP, ERR) << "Cannot load blob file " << fn << ". Memory will remain uninitialized\n";
         return;
     }
 
@@ -67,12 +67,12 @@ void Memory::load_blob(const std::string &fn)
     std::fseek(f, 0, SEEK_SET);
 
     if (uint64_t(file_size) > m_size) {
-        WRN_STREAM("Blob file " << fn << " does not fit into memory, loading will be truncated\n");
+        LOG(APP, WRN) << "Blob file " << fn << " does not fit into memory, loading will be truncated\n";
     }
 
     size_t to_read = std::min(uint64_t(file_size), m_size);
     if (std::fread(m_bytes, to_read, 1, f) != 1) {
-        WRN_STREAM("Error while reading blob file " << fn << "\n");
+        LOG(APP, WRN) << "Error while reading blob file " << fn << "\n";
     }
 
     std::fclose(f);
@@ -83,7 +83,7 @@ void Memory::bus_cb_read(uint64_t addr, uint8_t *data, unsigned int len, bool &b
     wait(MEM_READ_LATENCY);
 
     if (addr + len >= m_size) {
-        ERR_PRINTF("reading outside bounds\n");
+        LOG(SIM, ERR) << "reading outside bounds\n";
         bErr = true;
         return;
     }
@@ -96,13 +96,13 @@ void Memory::bus_cb_write(uint64_t addr, uint8_t *data, unsigned int len, bool &
     wait(MEM_WRITE_LATENCY);
 
     if (m_readonly) {
-        ERR_PRINTF("trying to write to read-only memory\n");
+        LOG(SIM, ERR) << "trying to write to read-only memory\n";
         bErr = true;
         return;
     }
 
     if (addr + len >= m_size) {
-        ERR_PRINTF("writing outside bounds\n");
+        LOG(SIM, ERR) << "writing outside bounds\n";
         bErr = true;
         return;
     }
