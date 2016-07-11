@@ -28,7 +28,7 @@
 
 using namespace sc_core;
 
-Memory::Memory(sc_core::sc_module_name name, ComponentParameters &params)
+Memory::Memory(sc_core::sc_module_name name, Parameters &params)
     : Slave(name, params)
     , MEM_WRITE_LATENCY(3, SC_NS)
     , MEM_READ_LATENCY(3, SC_NS)

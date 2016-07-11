@@ -43,7 +43,7 @@ public:
     const sc_core::sc_time MEM_WRITE_LATENCY;
     const sc_core::sc_time MEM_READ_LATENCY;
 
-    Memory(sc_core::sc_module_name name, ComponentParameters &params);
+    Memory(sc_core::sc_module_name name, Parameters &params);
     virtual ~Memory();
 };
 
