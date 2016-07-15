@@ -17,10 +17,10 @@ static const ArmBootloader::PatchBlob::Entry SIMPLE_MONO_CPU[] = {
     { 0,          ArmBootloader::FIXUP_KERNEL_ENTRY }
 };
 
-/* 
+/*
  * First part of the versatile express compatible bootloader.
- * It first reads the cpuid. If 0, it loads r0, r1, r2 and jump to kernel entry 
- * Otherwise, it jumps to the secondary bootloader entry. 
+ * It first reads the cpuid. If 0, it loads r0, r1, r2 and jump to kernel entry
+ * Otherwise, it jumps to the secondary bootloader entry.
  */
 static const ArmBootloader::PatchBlob::Entry VERSATILE_SMP[] = {
     { 0xee101fb0, ArmBootloader::FIXUP_NONE }, /* mrc     15, 0, r1, cr0, cr0, {5} */
@@ -40,7 +40,7 @@ static const ArmBootloader::PatchBlob::Entry VERSATILE_SMP[] = {
     { 0,          ArmBootloader::FIXUP_KERNEL_ENTRY }
 };
 
-/* 
+/*
  * Secondary entry of the versatile express compatible bootloader.
  * It setups the interrupt controller and wait for interrupt.
  * On wakeup, it reads a fixed address to know its boot entry.
@@ -70,20 +70,18 @@ const ArmBootloader::PatchBlob BootloaderPlugin::ARM_BLOBS[NumArmBlob] = {
 };
 
 
-void BootloaderPlugin::arm_load_blob(PlatformDescription &descr, ArmBootloader &bl)
+void BootloaderPlugin::arm_load_blob(ArmBootloader &bl)
 {
     ArmBlob blob = SimpleMonoCpu;
 
-    if (descr["blob"].is_scalar()) {
-        std::string ublob = descr["blob"].as<std::string>();
+    std::string ublob = m_params["blob"].as<std::string>();
 
-        if (ublob == "simple-mono-cpu") {
-            blob = SimpleMonoCpu;
-        } else if (ublob == "vexpress") {
-            blob = VersatileSMP;
-        } else {
-            LOG(APP, WRN) << "Unknown blob `" << ublob << "`. Falling back to simple-mono-cpu.\n";
-        }
+    if (ublob == "simple") {
+        blob = SimpleMonoCpu;
+    } else if (ublob == "vexpress") {
+        blob = VersatileSMP;
+    } else {
+        MLOG(APP, WRN) << "Unknown blob `" << ublob << "`. Falling back to simple.\n";
     }
 
     bl.set_entry_blob(ARM_BLOBS[blob]);
@@ -93,7 +91,7 @@ void BootloaderPlugin::arm_load_blob(PlatformDescription &descr, ArmBootloader &
     }
 }
 
-void BootloaderPlugin::arm_bootloader(PlatformDescription &descr, PlatformBuilder &builder)
+void BootloaderPlugin::arm_bootloader(PlatformBuilder &builder)
 {
     ArmBootloader bl(&(builder.get_dbg_init()));
     bool has_dtb = false;
@@ -101,49 +99,49 @@ void BootloaderPlugin::arm_bootloader(PlatformDescription &descr, PlatformBuilde
 
     get_app_logger().save_flags();
 
-    if (descr["kernel-image"].is_scalar()) {
-        std::string img = descr["kernel-image"].as<std::string>();
-        LOG(APP, DBG) << "Loading kernel image " << img << "\n";
+    if (!m_params["kernel-image"].is_default()) {
+        std::string img = m_params["kernel-image"].as<std::string>();
+        MLOG(APP, DBG) << "Loading kernel image " << img << "\n";
         bl.set_kernel_image(img);
         has_kernel = true;
     }
 
-    if (has_kernel && (descr["kernel-load-addr"].is_scalar())) {
-        uint32_t load_addr = descr["kernel-load-addr"].as<uint32_t>();
-        LOG(APP, DBG) << "Setting kernel load address at 0x" << std::hex << load_addr << "\n";
+    if (has_kernel && (!m_params["kernel-load-addr"].is_default())) {
+        uint32_t load_addr = m_params["kernel-load-addr"].as<uint32_t>();
+        MLOG(APP, DBG) << "Setting kernel load address at 0x" << std::hex << load_addr << "\n";
         bl.set_kernel_load_addr(load_addr);
     }
 
-    if (descr["dtb"].is_scalar()) {
-        std::string img = descr["dtb"].as<std::string>();
-        LOG(APP, DBG) << "Loading dtb" << img << "\n";
+    if (!m_params["dtb"].is_default()) {
+        std::string img = m_params["dtb"].as<std::string>();
+        MLOG(APP, DBG) << "Loading dtb" << img << "\n";
         bl.set_dtb(img);
         bl.set_machine_id(0xffffffff);
         has_dtb = true;
     }
 
-    if (has_dtb && (descr["dtb-load-addr"].is_scalar())) {
-        uint32_t load_addr = descr["dtb-load-addr"].as<uint32_t>();
-        LOG(APP, DBG) << "Setting dtb load address at 0x" << std::hex << load_addr << "\n";
+    if (has_dtb && (!m_params["dtb-load-addr"].is_default())) {
+        uint32_t load_addr = m_params["dtb-load-addr"].as<uint32_t>();
+        MLOG(APP, DBG) << "Setting dtb load address at 0x" << std::hex << load_addr << "\n";
         bl.set_dtb_load_addr(load_addr);
     }
 
-    if (descr["ram-start"].is_scalar()) {
-        uint32_t ram_start = descr["ram-start"].as<uint32_t>();
-        LOG(APP, DBG) << "Setting ram start address at 0x" << ram_start << "\n";
+    if (!m_params["ram-start"].is_default()) {
+        uint32_t ram_start = m_params["ram-start"].as<uint32_t>();
+        MLOG(APP, DBG) << "Setting ram start address at 0x" << ram_start << "\n";
         bl.set_ram_start(ram_start);
     }
 
-    if ((!has_dtb) && descr["machine-id"].is_scalar()) {
-        uint32_t machine_id = descr["machine-id"].as<uint32_t>();
-        LOG(APP, DBG) << "Setting machine id 0x" << machine_id << "\n";
+    if ((!has_dtb) && (!m_params["machine-id"].is_default())) {
+        uint32_t machine_id = m_params["machine-id"].as<uint32_t>();
+        MLOG(APP, DBG) << "Setting machine id 0x" << machine_id << "\n";
         bl.set_machine_id(machine_id);
     }
 
-    arm_load_blob(descr, bl);
+    arm_load_blob(bl);
 
     if (bl.boot()) {
-        LOG(APP, ERR) << "Bootloader failed.\n";
+        MLOG(APP, ERR) << "Bootloader failed.\n";
     }
 
     get_app_logger().restore_flags();
@@ -151,26 +149,12 @@ void BootloaderPlugin::arm_bootloader(PlatformDescription &descr, PlatformBuilde
 
 void BootloaderPlugin::hook(const PluginHookAfterBuild& h)
 {
-    PlatformDescription &global_descr = *(h.get_descr());
-
-    if (global_descr["bootloader"].type() != PlatformDescription::MAP) {
-        LOG(APP, DBG) << "No bootloader configuration in description\n";
-        return;
-    }
-
-    PlatformDescription &descr = global_descr["bootloader"];
-    
-    if (descr["architecture"].type() != PlatformDescription::SCALAR) {
-        LOG(APP, ERR) << "Bootloader: missing `architecture` specifier\n";
-        return;
-    }
-
-    std::string arch = descr["architecture"].as<std::string>();
+    std::string arch = m_params["architecture"].as<std::string>();
 
     if (arch == "arm") {
-        arm_bootloader(descr, *(h.get_builder()));
+        arm_bootloader(*(h.get_builder()));
     } else {
-        LOG(APP, ERR) << "Bootloader: Unknown architecture `" << arch << "`\n";
+        MLOG(APP, ERR) << "Bootloader: Unknown architecture `" << arch << "`\n";
     }
 }
 

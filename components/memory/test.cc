@@ -41,7 +41,7 @@ protected:
     ComponentBase *mem;
     SlaveTester<> tst;
 
-    MemoryTester(sc_module_name n) : Test(n), tst("slave-tester")
+    MemoryTester(sc_module_name n, ConfigManager &c) : Test(n, c), tst("slave-tester", c)
     {
         std::stringstream yml;
 
@@ -56,7 +56,7 @@ protected:
 
         mem = create_component_by_name("generic-memory", yml.str());
 
-	mem->get_port("bus").connect(tst.get_port("bus"));
+        mem->get_port("bus").connect(tst.get_port("bus"));
     }
 
     uint64_t load_blob(std::vector<uint8_t> &blob) {
@@ -97,7 +97,7 @@ RABBITS_UNIT_TEST(memory_write_io, MemoryTester<>)
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
 
     RABBITS_TEST_ASSERT(tst.debug_read_u32_nofail(0x0) == 0xdecacafe);
-    RABBITS_TEST_ASSERT_TIME_DELTA(SC_ZERO_TIME); /* Debug access should not have 
+    RABBITS_TEST_ASSERT_TIME_DELTA(SC_ZERO_TIME); /* Debug access should not have
                                                      side effects on simulation time */
 }
 
@@ -105,7 +105,7 @@ RABBITS_UNIT_TEST(memory_read_io, MemoryTester<>)
 {
     tst.debug_write_u32_nofail(0x0, 0xdecacafe);
 
-    RABBITS_TEST_ASSERT_TIME_DELTA(SC_ZERO_TIME); /* Debug access should not have 
+    RABBITS_TEST_ASSERT_TIME_DELTA(SC_ZERO_TIME); /* Debug access should not have
                                                      side effects on simulation time */
 
     RABBITS_TEST_ASSERT(tst.bus_read_u32(0x0) == 0xdecacafe);

@@ -21,7 +21,6 @@
 #define _PLUGINS_BOOTLOADER_H
 
 #include <rabbits/plugin/plugin.h>
-#include <rabbits/plugin/factory.h>
 #include <rabbits/loader/bootloader.h>
 
 class BootloaderPlugin : public Plugin {
@@ -35,21 +34,20 @@ protected:
 
     static const ArmBootloader::PatchBlob ARM_BLOBS[NumArmBlob];
 
-    void arm_load_blob(PlatformDescription &descr, ArmBootloader &bl);
-    void arm_bootloader(PlatformDescription &descr, PlatformBuilder &builder);
+    void arm_load_blob(ArmBootloader &bl);
+    void arm_bootloader(PlatformBuilder &builder);
 
 public:
+    BootloaderPlugin(const std::string & name, const Parameters & params, ConfigManager &c)
+        : Plugin(name, params, c)
+    {
+        c.add_param_alias("kernel", m_params["kernel-image"]);
+        c.add_param_alias("dtb", m_params["dtb"]);
+    }
+
     virtual ~BootloaderPlugin() {}
 
     virtual void hook(const PluginHookAfterBuild& h);
-};
-
-class BootloaderPluginFactory : public PluginFactory {
-public:
-    virtual ~BootloaderPluginFactory() {}
-
-    virtual Plugin *create() { return new BootloaderPlugin; }
-    virtual std::string get_name() { return "bootloader"; }
 };
 
 #endif

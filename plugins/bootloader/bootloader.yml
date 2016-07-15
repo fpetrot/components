@@ -2,3 +2,57 @@ plugin:
   name: bootloader
   include: bootloader.h
   class: BootloaderPlugin
+  description: Bootloader simulation plugin.
+  parameters:
+    architecture:
+      type: string
+      description: The processor architecture to bootload (the only supported value is `arm`).
+      default: arm
+
+    ram-start:
+      type: uint32
+      description: |
+        Start address of the system memory.
+        The bootloader will use this address as a base address to load payloads such as the kernel or the DTB.
+      default: 0
+
+    kernel-load-addr:
+      type: uint32
+      description: |
+        Specify the kernel load address. If this option is not specified,
+        the bootloader will choose an address it thinks to be safe.
+      default: 0
+
+    dtb-load-addr:
+      type: uint32
+      description: |
+        Specify the DTB load address. If this option is not specified,
+        the bootloader will choose an address it thinks to be safe.
+      default: 0
+
+    machine-id:
+      type: uint32
+      description: |
+        The machine ID written to register r1, used by Linux to know which machine it is running on.
+        This parameter is only used when booting without DTB.
+      default: 0
+
+    blob:
+      type: string
+      description: |
+        The binary blob template used by the bootloader, generated and copied to 0x0.
+        Valid values are:
+          - simple: For simple, monoprocessor ARM boards
+          - vexpress: For Versatile Express-like boards
+      default: simple
+
+    dtb:
+      type: string
+      description: File name of the DTB to load.
+      default: ""
+
+    kernel-image:
+      type: string
+      description: File name of the kernel image to load.
+      default: ""
+
