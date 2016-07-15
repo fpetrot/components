@@ -81,6 +81,24 @@ protected:
         return file_size;
     }
 
+    void mute_logger() {
+        get_app_logger().mute();
+        get_sim_logger().mute();
+        mem->get_logger(LogContext::APP).mute();
+        mem->get_logger(LogContext::SIM).mute();
+        tst.get_logger(LogContext::APP).mute();
+        tst.get_logger(LogContext::SIM).mute();
+    }
+
+    void unmute_logger() {
+        tst.get_logger(LogContext::APP).unmute();
+        tst.get_logger(LogContext::SIM).unmute();
+        mem->get_logger(LogContext::APP).unmute();
+        mem->get_logger(LogContext::SIM).unmute();
+        get_app_logger().unmute();
+        get_sim_logger().unmute();
+    }
+
 public:
     ~MemoryTester() {
         delete mem;
@@ -136,16 +154,16 @@ RABBITS_UNIT_TEST(memory_dmi, MemoryTester<>)
 
 RABBITS_UNIT_TEST(memory_access_outbound, MemoryTester<>)
 {
-    get_app_logger().mute(); /* Outbound accesses generate errors */
+    mute_logger(); /* Outbound accesses generate errors */
     tst.bus_write_u32(MEM_SIZE, 0xdeadbaba);
-    get_app_logger().unmute();
+    unmute_logger();
 
     RABBITS_TEST_ASSERT(tst.last_access_failed());
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
 
-    get_app_logger().mute();
+    mute_logger();
     tst.bus_read_u32(MEM_SIZE);
-    get_app_logger().unmute();
+    unmute_logger();
 
     RABBITS_TEST_ASSERT(tst.last_access_failed());
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
@@ -153,9 +171,9 @@ RABBITS_UNIT_TEST(memory_access_outbound, MemoryTester<>)
 
 RABBITS_UNIT_TEST(memory_readonly, MemoryTester<true>)
 {
-    get_app_logger().mute();
+    mute_logger();
     tst.bus_write_u32(0x0, 0xdada7070);
-    get_app_logger().unmute();
+    unmute_logger();
 
     RABBITS_TEST_ASSERT(tst.last_access_failed());
     RABBITS_TEST_ASSERT_NE(tst.debug_read_u32_nofail(0x0), 0xdada7070);
