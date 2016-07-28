@@ -152,7 +152,7 @@ void BootloaderPlugin::hook(const PluginHookAfterBuild& h)
     std::string arch = m_params["architecture"].as<std::string>();
 
     if (arch == "arm") {
-        arm_bootloader(*(h.get_builder()));
+        arm_bootloader(h.get_builder());
     } else {
         MLOG(APP, ERR) << "Bootloader: Unknown architecture `" << arch << "`\n";
     }
