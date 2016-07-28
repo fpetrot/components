@@ -8,6 +8,7 @@ plugin:
       type: string
       description: The processor architecture to bootload (the only supported value is `arm`).
       default: arm
+      advanced: true
 
     ram-start:
       type: uint32
@@ -15,6 +16,7 @@ plugin:
         Start address of the system memory.
         The bootloader will use this address as a base address to load payloads such as the kernel or the DTB.
       default: 0
+      advanced: true
 
     kernel-load-addr:
       type: uint32
@@ -22,6 +24,7 @@ plugin:
         Specify the kernel load address. If this option is not specified,
         the bootloader will choose an address it thinks to be safe.
       default: 0
+      advanced: true
 
     dtb-load-addr:
       type: uint32
@@ -29,6 +32,7 @@ plugin:
         Specify the DTB load address. If this option is not specified,
         the bootloader will choose an address it thinks to be safe.
       default: 0
+      advanced: true
 
     machine-id:
       type: uint32
@@ -36,6 +40,7 @@ plugin:
         The machine ID written to register r1, used by Linux to know which machine it is running on.
         This parameter is only used when booting without DTB.
       default: 0
+      advanced: true
 
     blob:
       type: string
@@ -45,6 +50,7 @@ plugin:
           - simple: For simple, monoprocessor ARM boards
           - vexpress: For Versatile Express-like boards
       default: simple
+      advanced: true
 
     dtb:
       type: string
