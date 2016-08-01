@@ -1,5 +1,5 @@
 plugin:
-  name: bootloader
+  type: bootloader
   include: bootloader.h
   class: BootloaderPlugin
   description: Bootloader simulation plugin.

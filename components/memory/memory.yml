@@ -1,5 +1,5 @@
 component:
-  name: generic-memory
+  implementation: generic-memory
   type: memory
   class: Memory
   include: memory.h

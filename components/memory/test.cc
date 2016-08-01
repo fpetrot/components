@@ -54,7 +54,7 @@ protected:
             yml << "file-blob: " << blob_path.string() << "\n";
         }
 
-        mem = create_component_by_name("generic-memory", yml.str());
+        mem = create_component_by_implem("generic-memory", yml.str());
 
         mem->get_port("bus").connect(tst.get_port("bus"));
     }
