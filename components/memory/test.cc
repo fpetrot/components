@@ -56,7 +56,7 @@ protected:
 
         mem = create_component_by_implem("generic-memory", yml.str());
 
-        mem->get_port("bus").connect(tst.get_port("bus"));
+        mem->get_port("mem").connect(tst.get_port("mem"));
     }
 
     uint64_t load_blob(std::vector<uint8_t> &blob) {
