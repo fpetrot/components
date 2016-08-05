@@ -9,14 +9,16 @@ component:
       type: uint64
       default: 128M
       description: Memory size in byte.
+      advanced: true
     readonly:
       type: boolean
       default: false
-      description: Read-only memory
+      description: Set this memory component read-only.
+      advanced: true
     file-blob:
       type: string
       default:
-      description: File image to load into the memory during elaboration
+      description: File image to load into this memory component during elaboration.
 
     #read-latency:
       #type: time
