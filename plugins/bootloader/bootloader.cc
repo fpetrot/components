@@ -99,12 +99,15 @@ void BootloaderPlugin::arm_bootloader(PlatformBuilder &builder)
 
     get_app_logger().save_flags();
 
-    if (!m_params["kernel-image"].is_default()) {
-        std::string img = m_params["kernel-image"].as<std::string>();
-        MLOG(APP, DBG) << "Loading kernel image " << img << "\n";
-        bl.set_kernel_image(img);
-        has_kernel = true;
+    if (m_params["kernel-image"].is_default()) {
+        MLOG(APP, DBG) << "No kernel image provided. Skipping bootloader.\n";
+        return;
     }
+
+    std::string img = m_params["kernel-image"].as<std::string>();
+    MLOG(APP, DBG) << "Loading kernel image " << img << "\n";
+    bl.set_kernel_image(img);
+    has_kernel = true;
 
     if (has_kernel && (!m_params["kernel-load-addr"].is_default())) {
         uint32_t load_addr = m_params["kernel-load-addr"].as<uint32_t>();
