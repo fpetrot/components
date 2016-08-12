@@ -34,14 +34,14 @@ const sc_time MEM_WRITE_LATENCY(3, SC_NS);
 const std::string FILE_BLOB = "test/blob";
 
 template <bool READONLY = false, bool LOAD_BLOB = false, uint64_t _MEM_SIZE=0x1000>
-class MemoryTester : public Test {
+class MemoryTester : public TestBench {
 protected:
     static const uint64_t MEM_SIZE = _MEM_SIZE;
 
     ComponentBase *mem;
     SlaveTester<> tst;
 
-    MemoryTester(sc_module_name n, ConfigManager &c) : Test(n, c), tst("slave-tester", c)
+    MemoryTester(sc_module_name n, ConfigManager &c) : TestBench(n, c), tst("slave-tester", c)
     {
         std::stringstream yml;
 
@@ -107,7 +107,7 @@ public:
 };
 
 
-RABBITS_UNIT_TEST(memory_write_io, MemoryTester<>)
+RABBITS_UNIT_TESTBENCH(memory_write_io, MemoryTester<>)
 {
     tst.bus_write_u32(0x0, 0xdecacafe);
 
@@ -119,7 +119,7 @@ RABBITS_UNIT_TEST(memory_write_io, MemoryTester<>)
                                                      side effects on simulation time */
 }
 
-RABBITS_UNIT_TEST(memory_read_io, MemoryTester<>)
+RABBITS_UNIT_TESTBENCH(memory_read_io, MemoryTester<>)
 {
     tst.debug_write_u32_nofail(0x0, 0xdecacafe);
 
@@ -131,7 +131,7 @@ RABBITS_UNIT_TEST(memory_read_io, MemoryTester<>)
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_READ_LATENCY);
 }
 
-RABBITS_UNIT_TEST(memory_dmi, MemoryTester<>)
+RABBITS_UNIT_TESTBENCH(memory_dmi, MemoryTester<>)
 {
     DmiInfo dmi;
 
@@ -152,7 +152,7 @@ RABBITS_UNIT_TEST(memory_dmi, MemoryTester<>)
     RABBITS_TEST_ASSERT_EQ(mem[0x40], 0xdeadbeef);
 }
 
-RABBITS_UNIT_TEST(memory_access_outbound, MemoryTester<>)
+RABBITS_UNIT_TESTBENCH(memory_access_outbound, MemoryTester<>)
 {
     mute_logger(); /* Outbound accesses generate errors */
     tst.bus_write_u32(MEM_SIZE, 0xdeadbaba);
@@ -169,7 +169,7 @@ RABBITS_UNIT_TEST(memory_access_outbound, MemoryTester<>)
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
 }
 
-RABBITS_UNIT_TEST(memory_readonly, MemoryTester<true>)
+RABBITS_UNIT_TESTBENCH(memory_readonly, MemoryTester<true>)
 {
     mute_logger();
     tst.bus_write_u32(0x0, 0xdada7070);
@@ -180,7 +180,7 @@ RABBITS_UNIT_TEST(memory_readonly, MemoryTester<true>)
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
 }
 
-RABBITS_UNIT_TEST(memory_readonly_dmi, MemoryTester<true>)
+RABBITS_UNIT_TESTBENCH(memory_readonly_dmi, MemoryTester<true>)
 {
     DmiInfo dmi;
 
@@ -191,7 +191,7 @@ RABBITS_UNIT_TEST(memory_readonly_dmi, MemoryTester<true>)
 
 
 #define COMMA ,
-RABBITS_UNIT_TEST(memory_load_blob_plenty, MemoryTester<false COMMA true>)
+RABBITS_UNIT_TESTBENCH(memory_load_blob_plenty, MemoryTester<false COMMA true>)
 {
     DmiInfo dmi;
 
@@ -204,7 +204,7 @@ RABBITS_UNIT_TEST(memory_load_blob_plenty, MemoryTester<false COMMA true>)
 }
 
 
-RABBITS_UNIT_TEST(memory_load_blob_fit, MemoryTester<false COMMA true COMMA 1024>)
+RABBITS_UNIT_TESTBENCH(memory_load_blob_fit, MemoryTester<false COMMA true COMMA 1024>)
 {
     DmiInfo dmi;
 
@@ -216,7 +216,7 @@ RABBITS_UNIT_TEST(memory_load_blob_fit, MemoryTester<false COMMA true COMMA 1024
     RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.ptr, file_size), 0);
 }
 
-RABBITS_UNIT_TEST(memory_load_blob_trunc, MemoryTester<false COMMA true COMMA 512>)
+RABBITS_UNIT_TESTBENCH(memory_load_blob_trunc, MemoryTester<false COMMA true COMMA 512>)
 {
     DmiInfo dmi;
 
