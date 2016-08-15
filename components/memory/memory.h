@@ -30,6 +30,7 @@ protected:
     uint8_t *m_bytes;
 
     void load_blob(const std::string &fn);
+    void dump_to_file(const std::string &fn);
 
     void bus_cb_read(uint64_t addr, uint8_t *data, unsigned int len, bool &bErr);
     void bus_cb_write(uint64_t addr, uint8_t *data, unsigned int len, bool &bErr);

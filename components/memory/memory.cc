@@ -55,7 +55,7 @@ void Memory::load_blob(const std::string &fn)
 {
     FILE *f = std::fopen(fn.c_str(), "r");
 
-    MLOG(APP, DBG) << "Loading blob " << fn << "\n";
+    MLOG(APP, DBG) << "Loading blob `" << fn << "`\n";
 
     if (f == NULL) {
         MLOG(APP, ERR) << "Cannot load blob file " << fn << ". Memory will remain uninitialized\n";
@@ -67,12 +67,30 @@ void Memory::load_blob(const std::string &fn)
     std::fseek(f, 0, SEEK_SET);
 
     if (uint64_t(file_size) > m_size) {
-        MLOG(APP, WRN) << "Blob file " << fn << " does not fit into memory, loading will be truncated\n";
+        MLOG(APP, WRN) << "Blob file `" << fn << "` does not fit into memory, loading will be truncated\n";
     }
 
     size_t to_read = std::min(uint64_t(file_size), m_size);
     if (std::fread(m_bytes, to_read, 1, f) != 1) {
         MLOG(APP, WRN) << "Error while reading blob file " << fn << "\n";
+    }
+
+    std::fclose(f);
+}
+
+void Memory::dump_to_file(const std::string &fn)
+{
+    FILE *f = std::fopen(fn.c_str(), "w");
+
+    MLOG(APP, DBG) << "Dumping memory in `" << fn << "`\n";
+
+    if (f == NULL) {
+        MLOG(APP, ERR) << "Cannot load file " << fn << ".\n";
+        return;
+    }
+
+    if (std::fwrite(m_bytes, m_size, 1, f) != 1) {
+        MLOG(APP, WRN) << "Error while dumping memory in " << fn << "\n";
     }
 
     std::fclose(f);
@@ -144,7 +162,7 @@ bool Memory::get_direct_mem_ptr(tlm::tlm_generic_payload& trans,
     } else {
         dmi_data.set_granted_access(tlm::tlm_dmi::DMI_ACCESS_READ_WRITE);
     }
-    
+
     dmi_data.set_write_latency(MEM_WRITE_LATENCY);
     dmi_data.set_read_latency(MEM_READ_LATENCY);
 
