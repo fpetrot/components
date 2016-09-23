@@ -62,3 +62,7 @@ plugin:
       description: File name of the kernel image to load.
       default: ""
 
+    append:
+      type: string
+      description: Kernel command line
+      default: ""
