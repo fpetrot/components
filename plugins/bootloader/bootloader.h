@@ -43,6 +43,7 @@ public:
     {
         c.add_param_alias("kernel", m_params["kernel-image"]);
         c.add_param_alias("dtb", m_params["dtb"]);
+        c.add_param_alias("append", m_params["append"]);
     }
 
     virtual ~BootloaderPlugin() {}
