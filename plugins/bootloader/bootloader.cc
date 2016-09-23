@@ -121,6 +121,11 @@ void BootloaderPlugin::arm_bootloader(PlatformBuilder &builder)
         bl.set_dtb(img);
         bl.set_machine_id(0xffffffff);
         has_dtb = true;
+
+        if(!m_params["append"].is_default()) {
+            std::string bootargs = m_params["append"].as<std::string>();
+            bl.set_dtb_bootargs(bootargs);
+        }
     }
 
     if (has_dtb && (!m_params["dtb-load-addr"].is_default())) {
