@@ -17,6 +17,8 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#define RABBITS_TEST_MOD generic_memory
+
 #include <rabbits/test/test.h>
 #include <rabbits/test/slave_tester.h>
 
@@ -107,7 +109,7 @@ public:
 };
 
 
-RABBITS_UNIT_TESTBENCH(memory_write_io, MemoryTester<>)
+RABBITS_UNIT_TESTBENCH(write_io, MemoryTester<>)
 {
     tst.bus_write_u32(0x0, 0xdecacafe);
 
@@ -119,7 +121,7 @@ RABBITS_UNIT_TESTBENCH(memory_write_io, MemoryTester<>)
                                                      side effects on simulation time */
 }
 
-RABBITS_UNIT_TESTBENCH(memory_read_io, MemoryTester<>)
+RABBITS_UNIT_TESTBENCH(read_io, MemoryTester<>)
 {
     tst.debug_write_u32_nofail(0x0, 0xdecacafe);
 
@@ -131,7 +133,7 @@ RABBITS_UNIT_TESTBENCH(memory_read_io, MemoryTester<>)
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_READ_LATENCY);
 }
 
-RABBITS_UNIT_TESTBENCH(memory_dmi, MemoryTester<>)
+RABBITS_UNIT_TESTBENCH(dmi, MemoryTester<>)
 {
     DmiInfo dmi;
 
@@ -152,7 +154,7 @@ RABBITS_UNIT_TESTBENCH(memory_dmi, MemoryTester<>)
     RABBITS_TEST_ASSERT_EQ(mem[0x40], 0xdeadbeef);
 }
 
-RABBITS_UNIT_TESTBENCH(memory_access_outbound, MemoryTester<>)
+RABBITS_UNIT_TESTBENCH(access_outbound, MemoryTester<>)
 {
     mute_logger(); /* Outbound accesses generate errors */
     tst.bus_write_u32(MEM_SIZE, 0xdeadbaba);
@@ -169,7 +171,7 @@ RABBITS_UNIT_TESTBENCH(memory_access_outbound, MemoryTester<>)
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
 }
 
-RABBITS_UNIT_TESTBENCH(memory_readonly, MemoryTester<true>)
+RABBITS_UNIT_TESTBENCH(readonly, MemoryTester<true>)
 {
     mute_logger();
     tst.bus_write_u32(0x0, 0xdada7070);
@@ -180,7 +182,7 @@ RABBITS_UNIT_TESTBENCH(memory_readonly, MemoryTester<true>)
     RABBITS_TEST_ASSERT_TIME_DELTA(MEM_WRITE_LATENCY);
 }
 
-RABBITS_UNIT_TESTBENCH(memory_readonly_dmi, MemoryTester<true>)
+RABBITS_UNIT_TESTBENCH(readonly_dmi, MemoryTester<true>)
 {
     DmiInfo dmi;
 
@@ -191,7 +193,7 @@ RABBITS_UNIT_TESTBENCH(memory_readonly_dmi, MemoryTester<true>)
 
 
 #define COMMA ,
-RABBITS_UNIT_TESTBENCH(memory_load_blob_plenty, MemoryTester<false COMMA true>)
+RABBITS_UNIT_TESTBENCH(load_blob_plenty, MemoryTester<false COMMA true>)
 {
     DmiInfo dmi;
 
@@ -204,7 +206,7 @@ RABBITS_UNIT_TESTBENCH(memory_load_blob_plenty, MemoryTester<false COMMA true>)
 }
 
 
-RABBITS_UNIT_TESTBENCH(memory_load_blob_fit, MemoryTester<false COMMA true COMMA 1024>)
+RABBITS_UNIT_TESTBENCH(load_blob_fit, MemoryTester<false COMMA true COMMA 1024>)
 {
     DmiInfo dmi;
 
@@ -216,7 +218,7 @@ RABBITS_UNIT_TESTBENCH(memory_load_blob_fit, MemoryTester<false COMMA true COMMA
     RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.ptr, file_size), 0);
 }
 
-RABBITS_UNIT_TESTBENCH(memory_load_blob_trunc, MemoryTester<false COMMA true COMMA 512>)
+RABBITS_UNIT_TESTBENCH(load_blob_trunc, MemoryTester<false COMMA true COMMA 512>)
 {
     DmiInfo dmi;
 
