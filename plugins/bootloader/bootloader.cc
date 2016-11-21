@@ -54,7 +54,7 @@ static const ArmBootloader::PatchBlob::Entry VERSATILE_SMP_SECONDARY[] = {
     { 0xe3a010ff, ArmBootloader::FIXUP_NONE }, /* mov r1, #0xff */
     { 0xe5821004, ArmBootloader::FIXUP_NONE }, /* str r1, [r2, 4] - set GIC_PMR.Priority to 0xff */
     { 0xf57ff04f, ArmBootloader::FIXUP_NONE }, /* dsb */
-    { 0xe320f003, ArmBootloader::FIXUP_NONE }, /* wfi */
+    { 0xe320f002, ArmBootloader::FIXUP_NONE }, /* wfe */
     { 0xe5901000, ArmBootloader::FIXUP_NONE }, /* ldr     r1, [r0] */
     { 0xe1110001, ArmBootloader::FIXUP_NONE }, /* tst     r1, r1 */
     { 0x0afffffb, ArmBootloader::FIXUP_NONE }, /* beq     <wfi> */
