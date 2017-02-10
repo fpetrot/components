@@ -140,6 +140,12 @@ void BootloaderPlugin::arm_bootloader(PlatformBuilder &builder)
         bl.set_ram_start(ram_start);
     }
 
+    if (!m_params["ram-size"].is_default()) {
+        uint32_t ram_size = m_params["ram-size"].as<uint32_t>();
+        MLOG(APP, DBG) << "Setting ram size to 0x" << std::hex << ram_size << "\n";
+        bl.set_ram_size(ram_size);
+    }
+
     if ((!has_dtb) && (!m_params["machine-id"].is_default())) {
         uint32_t machine_id = m_params["machine-id"].as<uint32_t>();
         MLOG(APP, DBG) << "Setting machine id 0x" << machine_id << "\n";
