@@ -1,0 +1,27 @@
+component:
+  implementation: generic-stub
+  type: stub
+  class: Stub
+  include: stub.h
+  description: Generic stub components acting as a memory.
+  parameters:
+    size:
+      type: uint64
+      default: 128M
+      description: Stub size in byte.
+      advanced: true
+    readonly:
+      type: boolean
+      default: false
+      description: Set this stub component read-only.
+      advanced: true
+    file-blob:
+      type: string
+      default:
+      description: File image to load into this stub component during elaboration.
+      advanced: true
+    trace-mem-access:
+      type: boolean
+      default: false
+      description: When enable, DMI is disabled and memory accesses to this conponent can be made visible by enabling the `trace' parameter.
+      advanced: true
