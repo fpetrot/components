@@ -1,0 +1,1 @@
+rabbits_add_components(bus_interconnect.yml)
