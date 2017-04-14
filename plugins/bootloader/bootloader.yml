@@ -18,6 +18,13 @@ plugin:
       default: 0
       advanced: true
 
+    ram-size:
+      type: uint32
+      description: |
+        Size of the system memory.
+      default: 0
+      advanced: true
+
     kernel-load-addr:
       type: uint32
       description: |

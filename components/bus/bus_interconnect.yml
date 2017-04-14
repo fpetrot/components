@@ -1,0 +1,6 @@
+component:
+  implementation: generic-bus
+  type: simple-bus
+  class: BusInterconnect<32>
+  include: bus_interconnect.h
+  description: Generic TLM2.0 compatible bus component

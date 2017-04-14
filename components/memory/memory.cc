@@ -35,6 +35,7 @@ Memory::Memory(sc_core::sc_module_name name, const Parameters &params, ConfigMan
 {
     m_size = params["size"].as<uint64_t>();
     m_readonly = params["readonly"].as<bool>();
+    m_dmi = !params["disable-dmi"].as<bool>();
     m_bytes = new uint8_t[m_size];
 
     std::string blob_fn = params["file-blob"].as<std::string>();
@@ -98,6 +99,7 @@ void Memory::dump_to_file(const std::string &fn)
 
 void Memory::bus_cb_read(uint64_t addr, uint8_t *data, unsigned int len, bool &bErr)
 {
+    MLOG_F(SIM, TRC, "Memory read access at %016" PRIx64 " of size %u\n", addr, len);
     wait(MEM_READ_LATENCY);
 
     if (addr + len >= m_size) {
@@ -111,6 +113,7 @@ void Memory::bus_cb_read(uint64_t addr, uint8_t *data, unsigned int len, bool &b
 
 void Memory::bus_cb_write(uint64_t addr, uint8_t *data, unsigned int len, bool &bErr)
 {
+    MLOG_F(SIM, TRC, "Memory write access at %016" PRIx64 " of size %u\n", addr, len);
     wait(MEM_WRITE_LATENCY);
 
     if (m_readonly) {
@@ -149,6 +152,11 @@ uint64_t Memory::debug_write(uint64_t addr, const uint8_t *buf, uint64_t size)
 bool Memory::get_direct_mem_ptr(tlm::tlm_generic_payload& trans,
                                 tlm::tlm_dmi& dmi_data)
 {
+    if (!m_dmi) {
+        MLOG(APP, TRC) << "DMI disabled for this memory\n";
+        return false;
+    }
+
     if (trans.get_address() > m_size) {
         return false;
     }

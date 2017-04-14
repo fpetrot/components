@@ -28,6 +28,7 @@ protected:
     uint64_t m_size;
     bool m_readonly;
     uint8_t *m_bytes;
+    bool m_dmi;
 
     void load_blob(const std::string &fn);
     void dump_to_file(const std::string &fn);

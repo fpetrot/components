@@ -23,6 +23,7 @@
 #include <rabbits/test/slave_tester.h>
 
 #include <cstring>
+#include <cstdio>
 #include <fstream>
 
 #include <boost/filesystem.hpp>
@@ -33,7 +34,7 @@ using boost::filesystem::path;
 const sc_time MEM_READ_LATENCY(3, SC_NS);
 const sc_time MEM_WRITE_LATENCY(3, SC_NS);
 
-const std::string FILE_BLOB = "test/blob";
+const int BLOB_SIZE = 1024;
 
 template <bool READONLY = false, bool LOAD_BLOB = false, uint64_t _MEM_SIZE=0x1000>
 class MemoryTester : public TestBench {
@@ -43,44 +44,43 @@ protected:
     ComponentBase *mem;
     SlaveTester<> tst;
 
+    std::vector<uint8_t> m_blob;
+
     MemoryTester(sc_module_name n, ConfigManager &c) : TestBench(n, c), tst("slave-tester", c)
     {
         std::stringstream yml;
+        std::string blob_path;
 
         yml << "size: " << MEM_SIZE << "\n";
         yml << "readonly: " << READONLY << "\n";
 
         if (LOAD_BLOB) {
-            path blob_path(RABBITS_GET_TEST_DIR());
-            blob_path /= FILE_BLOB;
-            yml << "file-blob: " << blob_path.string() << "\n";
+            blob_path = create_blob();
+            yml << "file-blob: " << blob_path << "\n";
         }
 
         mem = create_component_by_implem("generic-memory", yml.str());
 
         mem->get_port("mem").connect(tst.get_port("mem"));
+
+        if (LOAD_BLOB) {
+            std::remove(blob_path.c_str());
+        }
     }
 
-    uint64_t load_blob(std::vector<uint8_t> &blob) {
-        path blob_path(RABBITS_GET_TEST_DIR());
-        blob_path /= FILE_BLOB;
+    std::string create_blob() {
+        std::string blob_path = boost::filesystem::unique_path().string();
 
-        LOG(APP, DBG) << "Trying to load blob file " << blob_path.string() << "\n";
+        m_blob.resize(BLOB_SIZE);
 
-        std::ifstream f(blob_path.string().c_str(), std::ifstream::binary);
-        RABBITS_TEST_ASSERT(f.good());
+        uint8_t n = 0;
+        std::generate(m_blob.begin(), m_blob.end(), [&n] {return n++;});
 
-        f.unsetf(std::ios::skipws);
+        FILE* blob_file = std::fopen(blob_path.c_str(), "w");
+        fwrite(&m_blob[0], BLOB_SIZE, 1, blob_file);
+        std::fclose(blob_file);
 
-        f.seekg(0, std::ios::end);
-        std::streampos file_size = f.tellg();
-        f.seekg(0, std::ios::beg);
-
-        blob.resize(file_size);
-
-        std::copy(std::istream_iterator<uint8_t>(f), std::istream_iterator<uint8_t>(), blob.begin());
-
-        return file_size;
+        return blob_path;
     }
 
     void mute_logger() {
@@ -199,33 +199,24 @@ RABBITS_UNIT_TESTBENCH(load_blob_plenty, MemoryTester<false COMMA true>)
 
     RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
 
-    std::vector<uint8_t> blob;
-    uint64_t file_size = load_blob(blob);
-
-    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.ptr, file_size), 0);
+    RABBITS_TEST_ASSERT_EQ(std::memcmp(&m_blob[0], dmi.ptr, BLOB_SIZE), 0);
 }
 
 
-RABBITS_UNIT_TESTBENCH(load_blob_fit, MemoryTester<false COMMA true COMMA 1024>)
+RABBITS_UNIT_TESTBENCH(load_blob_fit, MemoryTester<false COMMA true COMMA BLOB_SIZE>)
 {
     DmiInfo dmi;
 
     RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
 
-    std::vector<uint8_t> blob;
-    uint64_t file_size = load_blob(blob);
-
-    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.ptr, file_size), 0);
+    RABBITS_TEST_ASSERT_EQ(std::memcmp(&m_blob[0], dmi.ptr, BLOB_SIZE), 0);
 }
 
-RABBITS_UNIT_TESTBENCH(load_blob_trunc, MemoryTester<false COMMA true COMMA 512>)
+RABBITS_UNIT_TESTBENCH(load_blob_trunc, MemoryTester<false COMMA true COMMA BLOB_SIZE/2>)
 {
     DmiInfo dmi;
 
     RABBITS_TEST_ASSERT(tst.get_dmi_info(dmi));
 
-    std::vector<uint8_t> blob;
-    load_blob(blob);
-
-    RABBITS_TEST_ASSERT_EQ(std::memcmp(&blob[0], dmi.ptr, MEM_SIZE), 0);
+    RABBITS_TEST_ASSERT_EQ(std::memcmp(&m_blob[0], dmi.ptr, MEM_SIZE), 0);
 }

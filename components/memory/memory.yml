@@ -19,6 +19,11 @@ component:
       type: string
       default:
       description: File image to load into this memory component during elaboration.
+    disable-dmi:
+      type: boolean
+      default: false
+      description: Disable DMI for this memory (for debugging purpose).
+      advanced: true
 
     #read-latency:
       #type: time
