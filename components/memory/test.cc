@@ -154,6 +154,15 @@ RABBITS_UNIT_TESTBENCH(dmi, MemoryTester<>)
     RABBITS_TEST_ASSERT_EQ(mem[0x40], 0xdeadbeef);
 }
 
+RABBITS_UNIT_TESTBENCH(access_boundary, MemoryTester<>)
+{
+    tst.bus_write_u32(MEM_SIZE - 4, 0xf00df00d);
+    RABBITS_TEST_ASSERT(tst.last_access_succeeded());
+
+    RABBITS_TEST_ASSERT(tst.bus_read_u32(MEM_SIZE - 4) == 0xf00df00d);
+    RABBITS_TEST_ASSERT(tst.last_access_succeeded());
+}
+
 RABBITS_UNIT_TESTBENCH(access_outbound, MemoryTester<>)
 {
     mute_logger(); /* Outbound accesses generate errors */
