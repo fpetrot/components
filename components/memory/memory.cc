@@ -102,7 +102,7 @@ void Memory::bus_cb_read(uint64_t addr, uint8_t *data, unsigned int len, bool &b
     MLOG_F(SIM, TRC, "Memory read access at %016" PRIx64 " of size %u\n", addr, len);
     wait(MEM_READ_LATENCY);
 
-    if (addr + len >= m_size) {
+    if (addr + len > m_size) {
         MLOG(SIM, ERR) << "reading outside bounds\n";
         bErr = true;
         return;
@@ -122,7 +122,7 @@ void Memory::bus_cb_write(uint64_t addr, uint8_t *data, unsigned int len, bool &
         return;
     }
 
-    if (addr + len >= m_size) {
+    if (addr + len > m_size) {
         MLOG(SIM, ERR) << "writing outside bounds\n";
         bErr = true;
         return;
