@@ -51,7 +51,7 @@ protected:
         uint64_t end;
     };
 
-    std::vector<TargetMapping *> m_ranges;
+    std::vector<TargetMapping> m_ranges;
 
     tlm::tlm_target_socket<BUSWIDTH, tlm::tlm_base_protocol_types, 0> m_target;
     tlm::tlm_initiator_socket<BUSWIDTH, tlm::tlm_base_protocol_types, 0> m_initiator;
@@ -59,14 +59,10 @@ protected:
     int decode_address(sc_dt::uint64 addr,
                        sc_dt::uint64& addr_offset)
     {
-        unsigned int i;
-        TargetMapping *range;
-
-        for (i = 0; i < m_ranges.size(); i++) {
-            range = m_ranges[i];
-            if (addr >= range->begin && addr < range->end) {
-                addr_offset = range->begin;
-                return range->target_index;
+        for (auto &range: m_ranges) {
+            if (addr >= range.begin && addr < range.end) {
+                addr_offset = range.begin;
+                return range.target_index;
             }
         }
 
@@ -98,15 +94,15 @@ public:
     void connect_target(BaseTargetSocket &target,
                         uint64_t addr, uint64_t len)
     {
-        TargetMapping *range = new TargetMapping();
+        TargetMapping range;
 
         /* XXX This piece of code relies on non-standard SystemC behavior.
          * It works with the Accellera reference implementation but is not
          * guaranteed to work with others. */
-        range->target_index = m_initiator.size();
+        range.target_index = m_initiator.size();
 
-        range->begin = addr;
-        range->end = addr + len;
+        range.begin = addr;
+        range.end = addr + len;
         m_ranges.push_back(range);
 
         m_initiator.bind(target);
