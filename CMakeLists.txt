@@ -8,6 +8,7 @@ find_package(libfdt REQUIRED)
 
 add_subdirectory(components)
 add_subdirectory(plugins)
+add_subdirectory(backends)
 
 rabbits_add_dynlib(components)
 target_link_libraries(components ${LIBFDT_LIBRARIES})

@@ -1,0 +1,5 @@
+backend:
+  type: simu-helper
+  class: SimuHelper
+  include: simu_helper.h
+  description: Simulation helper that calls sc_core::sc_stop() when written to.
