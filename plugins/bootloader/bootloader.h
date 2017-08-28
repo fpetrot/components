@@ -1,6 +1,6 @@
 /*
  *  This file is part of Rabbits
- *  Copyright (C) 2015  Clement Deschamps and Luc Michel
+ *  Copyright (C) 2015-2017  Clement Deschamps and Luc Michel
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License
@@ -17,11 +17,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef _PLUGINS_BOOTLOADER_H
-#define _PLUGINS_BOOTLOADER_H
+#pragma once
 
 #include <rabbits/plugin/plugin.h>
-#include <rabbits/loader/bootloader.h>
+#include "arm/bootloader.h"
 
 class BootloaderPlugin : public Plugin {
 protected:
@@ -50,5 +49,3 @@ public:
 
     virtual void hook(const PluginHookAfterBuild& h);
 };
-
-#endif
