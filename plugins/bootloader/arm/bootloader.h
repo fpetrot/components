@@ -101,6 +101,7 @@ public:
     };
 
 protected:
+    ConfigManager &m_config;
     PatchBlob m_entry;
     PatchBlob m_secondary_entry;
     DebugInitiator *m_bus;
@@ -112,8 +113,9 @@ protected:
     std::string m_kernel_path, m_initramfs_path, m_dtb_path, m_bootargs;
     uint32_t m_kernel_load_addr, m_initramfs_load_addr, m_dtb_load_addr;
 
+    uint64_t load_dtb(uint32_t &load_addr);
 public:
-    ArmBootloader(DebugInitiator *bus);
+    ArmBootloader(ConfigManager &config, DebugInitiator *bus);
     virtual ~ArmBootloader();
 
     /**

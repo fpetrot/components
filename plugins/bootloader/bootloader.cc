@@ -111,7 +111,7 @@ void BootloaderPlugin::arm_load_blob(ArmBootloader &bl)
 
 void BootloaderPlugin::arm_bootloader(PlatformBuilder &builder)
 {
-    ArmBootloader bl(&(builder.get_dbg_init()));
+    ArmBootloader bl(m_config, &(builder.get_dbg_init()));
     bool has_dtb = false;
     bool has_kernel = false;
 
